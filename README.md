@@ -10,9 +10,24 @@ How to start with HUE API : https://developers.meethue.com/develop/get-started-2
 
 ---
 
+With the latest update you can find the settings essential for server operation in PARAMETERS :
+
+![server-parameters](https://user-images.githubusercontent.com/34067164/218514770-1d5a9e3a-3c0a-4f25-8510-2959ea308aed.jpg)
+
+You only have to change the data in upper case and highlighted, with your data, depending on your configuration, the api key can be obtained by following the philips guide
+
+Without these parameters the server cannot function!!!
+The only optional one is the title, which is an aesthetic customisation
+
+---
+
 Browser Example:
 
-![Immagine 2023-01-17 184359](https://user-images.githubusercontent.com/34067164/212973194-0d04202a-2338-4cd5-9ed0-1b6f023d255e.jpg)
+![browser-ex](https://user-images.githubusercontent.com/34067164/218517206-93e29c67-f4e2-4676-9f20-71ca87f7ef19.png)
+
+Console Example:
+
+![console-ex](https://user-images.githubusercontent.com/34067164/218517350-86b3c416-341e-44a1-a395-ec3abb2fd35a.png)
 
 ---
 
