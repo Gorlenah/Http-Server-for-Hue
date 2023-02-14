@@ -12,24 +12,32 @@ How to start with HUE API : https://developers.meethue.com/develop/get-started-2
 
 With the latest update you can find the settings essential for server operation in PARAMETERS :
 
-![server-parameters](https://user-images.githubusercontent.com/34067164/218514770-1d5a9e3a-3c0a-4f25-8510-2959ea308aed.jpg)
+
+![server-parameters](https://user-images.githubusercontent.com/34067164/218745360-4f869e5a-8d82-4334-9a41-5f8c66800caf.jpg)
 
 You only have to change the data in upper case and highlighted, with your data, depending on your configuration, the api key can be obtained by following the philips guide
 
 Without these parameters the server cannot function!!!
-The only optional one is the title, which is an aesthetic customisation
+
+- HUE-API-KEY: api key for hue bridge access
+- HUE-BRIDGE-IP: hue bridge ip, recommended to have it static
+- SERVER-IP: ip on which you want the server to respond
+- title: server graphic title
+- myTimezone: represents the timezone in which the lights are to be controlled, it will be useful in the event of an update, for now it is not necessary for correct operation
+- lightsArray: contains the identification numbers of the lights to be controlled (each number must be separated by a comma)
 
 ---
 
 Browser Example:
 
-![browser-ex](https://user-images.githubusercontent.com/34067164/218517206-93e29c67-f4e2-4676-9f20-71ca87f7ef19.png)
+![browser-ex](https://user-images.githubusercontent.com/34067164/218744089-3993d8e6-557d-4e31-8c04-b1770af3acaa.png)
 
 Console Example:
 
-![console-ex](https://user-images.githubusercontent.com/34067164/218517350-86b3c416-341e-44a1-a395-ec3abb2fd35a.png)
+![console-ex](https://user-images.githubusercontent.com/34067164/218744369-0aa6655e-a185-4683-ac71-dc59a6e8626b.png)
 
 ---
+## Potential Problems
 
 On Server, Port occupied by the same process or others, e.g.:
 
