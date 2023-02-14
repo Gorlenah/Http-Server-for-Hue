@@ -23,6 +23,11 @@ const hostname = 'SERVER-IP';
 const port = 3000;
 //response title, used in console and http response
 const title = 'Philips Hue Change Status Server made by Gorlenah\n';
+//set your timezone
+const myTimezone = 'Europe/Berlin';
+//light numbers (Hue Bridge classification), which will be controlled [lightN1,lightN2]
+const lightsArray = [ 1, 2];
+
 
 //Skip TLS CA verification, hue bridge have an self signed CA
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
@@ -60,49 +65,60 @@ function optionsLight(lightNumber, putData){
   };
 }
 
-//Return Current Date formatted with UTC
+/*Return Current Date formatted with UTC, based on myTimezone parameter
+en-GB = 24h day/month/year format
+en-US = 12h month/day/year format
+*/
 function consoleDate(){
-  var date = new Date(Date.now());
-  return date.toUTCString()
+  const nDate = new Date().toLocaleString('en-GB', {
+    timeZone: myTimezone
+  });
+  
+  return nDate;
 }
 
 const server = http.createServer(async (req, res) => {
 
 try {
-  
-  //Get lights current status
-  var status1 = await lightStatus(1);
-  var status2 = await lightStatus(2);
+  var statusArray = [];
+  var newStatus;
   var oldStatus;
   
-  //Turn off lights if they have different status, or change status
-  if(status1 === status2){
-    var jsonObject = {
-      "on" : !status1
-    };
-    oldStatus = status1;
+  for (let i=0; i < lightsArray.length; i++) {
+    //Get lights current status
+    statusArray[i] = await lightStatus(lightsArray[i]);
+  }
+  
+  /*Turn off lights if they have different status, or change status
+  The function in the if, checks that each element is equal to the first element in the array, at the first dissimilarity returns false
+  Arrow function: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every
+  */
+  if ( statusArray.every( (elem, index, arr) => elem === arr[0] ) ) {
+    newStatus = !statusArray[0];
+    oldStatus = statusArray[0];
   } else {
-    var jsonObject = {
-      "on" : false
-    };
+    newStatus = false;
     oldStatus = true;
   }
   
+  var jsonObject = {
+    "on" : newStatus
+  };
+  
   var putData = JSON.stringify(jsonObject);
-
-  var reqLight1 = https.request(optionsLight(1, putData));
-  reqLight1.write(putData);
-  reqLight1.end();
-
-  var reqLight2 = https.request(optionsLight(2, putData));
-  reqLight2.write(putData);
-  reqLight2.end();
+  
+  //Send Put HTTPS to hue bridge, changing the status for each light
+  for (let i=0; i < lightsArray.length; i++) {
+    var reqLight = https.request(optionsLight(lightsArray[i], putData));
+    reqLight.write(putData);
+    reqLight.end();
+  }
   
   console.log(consoleDate()+' | old status: '+oldStatus+' | new status: '+!oldStatus+' |');
   
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/plain');
-  res.end(title+'\n old status: '+oldStatus+'\n new status: '+!oldStatus+'\n');
+  res.end(title+'\n old status: '+oldStatus+'\n new status: '+!oldStatus+'\n\n'+consoleDate());
   
 } catch (error) {
 
