@@ -12,7 +12,7 @@ const http = require('http');
 //hue require https
 const https = require('https');
 //hue requires your Api Key
-const hueApiKey = '/api/HUE-API-KEY';
+const hueApiKey = 'HUE-API-KEY';
 //hue bridge IP
 const bridgeIp = 'HUE-BRIDGE-IP';
 //hue bridge port
@@ -112,7 +112,7 @@ const server = http.createServer(async(req, res) => {
     statusArray[i] = await lightStatus(lightsArray[i], hueLightsUrl)
     .catch((error) => {
       console.error(consoleDate(), error);
-      errorStatus=true
+      errorStatus = true;
     });
   }
   
@@ -134,7 +134,7 @@ const server = http.createServer(async(req, res) => {
     await putLightData(lightsArray[i], newStatus, hueLightsUrl)
     .catch((error) => {
       console.error(consoleDate(), error);
-      errorStatus=true
+      errorStatus = true;
     });
   }
   
