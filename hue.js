@@ -27,66 +27,93 @@ const title = 'Philips Hue Change Status Server made by Gorlenah\n';
 const myTimezone = 'Europe/Berlin';
 //light numbers (Hue Bridge classification), which will be controlled [lightN1,lightN2]
 const lightsArray = [ 1, 2];
+//Build Base Url's - https://IP:PORT/api/API-KEY
+const hueBaseUrl = `https://${bridgeIp}:${bridgePort}/api/${hueApiKey}`;
+const hueLightsUrl = `${hueBaseUrl}/lights/`;
 
 
 //Skip TLS CA verification, hue bridge have an self signed CA
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
 /* With this function you ask the bridge the boolean status of the light, true = on,
+
 This function will return the light boolean state
 var lightNumber -> is the light number in hue bridge
+var hueLightsUrl -> is https://IP:PORT/api/API-KEY/lights/
 */
-async function lightStatus(lightNumber) {
-    const url = 'https://'.concat(bridgeIp).concat(hueApiKey).concat(/lights/).concat(lightNumber);
-    const response = await fetch(url);
+function lightStatus(lightNumber, hueLightsUrl) {
     
-    if (await !response.ok) {
-      throw new Error(`HTTP error ${response.status}`);
-    }
-    
-    const light = await response.json();
-    return light.state.on;
+    return fetch(hueLightsUrl + lightNumber).then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw `HTTP error ${response.status} , failed requesting light: ${lightNumber} status`;
+    })
+    .then((responseJson) => {
+      return responseJson.state.on;
+    })
+    .catch((error) => {
+      throw ('Error in lightStatus: ' + error);
+    });
 }
 
-/* With this function you create the HTTP PUT for the bridge
+/* With this function you send to the bridge the new boolean status of the light, true = on,
+
+The return is needed for throwing errors outside fetch
 var lightNumber -> is the light number in hue bridge
-var putData -> is the Json Data for the Light Status
+var newState -> is the new boolean state
+var hueLightsUrl -> https://IP:PORT/api/API-KEY/lights/
 */
-function optionsLight(lightNumber, putData){
-  return options = {
-    hostname: bridgeIp,
-    port: bridgePort,
-    path: hueApiKey.concat('/lights/').concat(lightNumber).concat('/state'),
+function putLightData(lightNumber, newStatus, hueLightsUrl){
+  let putData = { "on" : newStatus };
+
+  return fetch(`${hueLightsUrl}${lightNumber}/state`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'Content-Length': putData.length
+    },
+    body: JSON.stringify(putData),
+  })
+  .then((response) => {
+    if(!response.ok){
+      throw `HTTP error ${response.status} , PUT failed, light number: ${lightNumber}`;
     }
-  };
+  })
+  .catch((error) => {
+    throw ('Error in putLightData: ' + error);
+  });
 }
 
 /*Return Current Date formatted with UTC, based on myTimezone parameter
+
 en-GB = 24h day/month/year format
 en-US = 12h month/day/year format
+need global var:
+myTimezone
 */
 function consoleDate(){
-  const nDate = new Date().toLocaleString('en-GB', {
+  let nDate = new Date().toLocaleString('en-GB', {
     timeZone: myTimezone
   });
   
   return nDate;
 }
 
-const server = http.createServer(async (req, res) => {
+//Server Code
+const server = http.createServer(async(req, res) => {
 
-try {
   var statusArray = [];
   var newStatus;
   var oldStatus;
+  var errorStatus = false;
   
   for (let i=0; i < lightsArray.length; i++) {
     //Get lights current status
-    statusArray[i] = await lightStatus(lightsArray[i]);
+    statusArray[i] = await lightStatus(lightsArray[i], hueLightsUrl)
+    .catch((error) => {
+      console.error(consoleDate(), error);
+      errorStatus=true
+    });
   }
   
   /*Turn off lights if they have different status, or change status
@@ -98,34 +125,31 @@ try {
     oldStatus = statusArray[0];
   } else {
     newStatus = false;
-    oldStatus = true;
+    oldStatus = 'not the same';
   }
-  
-  var jsonObject = {
-    "on" : newStatus
-  };
-  
-  var putData = JSON.stringify(jsonObject);
   
   //Send Put HTTPS to hue bridge, changing the status for each light
   for (let i=0; i < lightsArray.length; i++) {
-    var reqLight = https.request(optionsLight(lightsArray[i], putData));
-    reqLight.write(putData);
-    reqLight.end();
+    //await needed for reporting 500 status in the response
+    await putLightData(lightsArray[i], newStatus, hueLightsUrl)
+    .catch((error) => {
+      console.error(consoleDate(), error);
+      errorStatus=true
+    });
   }
   
-  console.log(consoleDate()+' | old status: '+oldStatus+' | new status: '+!oldStatus+' |');
+  console.log(consoleDate()+'| old status: '+oldStatus+' | new status: '+!oldStatus+' |');
   
-  res.statusCode = 200;
   res.setHeader('Content-Type', 'text/plain');
-  res.end(title+'\n old status: '+oldStatus+'\n new status: '+!oldStatus+'\n\n'+consoleDate());
   
-} catch (error) {
-
-  console.log(consoleDate() + error);
-  res.statusCode = 500;
-  res.end(title + 'Server Error 500 - See Console\n');
-}
+  if(errorStatus){
+    res.statusCode = 500;
+    res.end(title + 'Server Error 500 - See Console\n');
+  } else{
+    res.statusCode = 200;
+    res.end(title+'\n old status: '+oldStatus+'\n new status: '+!oldStatus+'\n\n'+consoleDate());
+  }
+  
 });
 
 //Console reminder for hostname and port used
