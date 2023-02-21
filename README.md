@@ -12,8 +12,7 @@ How to start with HUE API : https://developers.meethue.com/develop/get-started-2
 
 With the latest update you can find the settings essential for server operation in PARAMETERS :
 
-
-![server-parameters](https://user-images.githubusercontent.com/34067164/218745360-4f869e5a-8d82-4334-9a41-5f8c66800caf.jpg)
+![parameters](https://user-images.githubusercontent.com/34067164/220471876-8e05d02a-4d6a-4512-9840-06b680014398.jpg)
 
 You only have to change the data in upper case and highlighted, with your data, depending on your configuration, the api key can be obtained by following the philips guide
 
@@ -24,7 +23,7 @@ Without these parameters the server cannot function!!!
 - SERVER-IP: ip on which you want the server to respond
 - title: server graphic title
 - myTimezone: represents the timezone in which the lights are to be controlled, it will be useful in the event of an update, for now it is not necessary for correct operation
-- lightsArray: contains the identification numbers of the lights to be controlled (each number must be separated by a comma)
+- lightsArray: contains the identification numbers of the lights to be controlled (each number must be separated by a comma, except the last)
 
 ---
 
