@@ -70,7 +70,7 @@ function putLightData(lightNumber, newStatus, hueLightsUrl){
   return fetch(`${hueLightsUrl}${lightNumber}/state`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(putData),
   })
