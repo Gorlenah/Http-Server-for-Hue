@@ -68,6 +68,15 @@ My Crontab example:
 ![persistance](https://user-images.githubusercontent.com/34067164/223135409-dfbe8322-7b94-4f94-9e93-3cab325ef9ff.png)
 
 ---
+## Integration with shelly relays
+
+You can integrate this project via the I/O URL function, present in shelly relays
+
+![shelly example](https://user-images.githubusercontent.com/34067164/223416812-527eed90-08a2-482c-82ba-3bea6984228a.jpg)
+
+I recommend to run the relay in detatched mode, so as to keep the hue lights always powered, the button or switch instead will communicate with the server to control the lights via the hue bridge, from field tests, with a server plugged into the local network, the response time is comparable to a direct relay
+
+---
 
 ## Potential Problems
 
